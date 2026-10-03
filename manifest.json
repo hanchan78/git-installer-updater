@@ -1,1 +1,1 @@
-{"id":"git-installer-updater","name":"Git Installer & Updater","version":"1.0.0","minAppVersion":"1.5.0","description":"Install and update built plugins from public GitHub repositories.","author":"Personal plugins","isDesktopOnly":false}
+{"id":"git-installer-updater","name":"Git Installer & Updater","version":"1.0.1","minAppVersion":"1.5.0","description":"Install and update built plugins from public GitHub repositories.","author":"Personal plugins","isDesktopOnly":false}

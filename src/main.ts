@@ -34,18 +34,25 @@ export default class Manager extends Plugin {
 
 class ManagerTab extends PluginSettingTab {
  constructor(app:App,private manager:Manager){super(app,manager);}
- display(){const c=this.containerEl;c.empty();c.createEl('h2',{text:'Git Installer & Updater'});const p=this.manager;const locked=p.bulk||p.busy.size>0;
+ display(){const c=this.containerEl;c.empty();c.addClass('giu-settings');c.createEl('h2',{text:'Git Installer & Updater'});const p=this.manager;const locked=p.bulk||p.busy.size>0;
  c.createEl('p',{text:'Only add repositories you trust. Installed plugins can access your vault. Newly installed plugins stay disabled.'});
  new Setting(c).setName('Repositories').addButton(b=>b.setButtonText('Add repository').setDisabled(locked).onClick(()=>new RepositoryModal(this.app,p).open())).addButton(b=>b.setButtonText('Check for updates').setDisabled(locked).onClick(()=>void p.runBulk(false))).addButton(b=>b.setButtonText('Update all').setDisabled(locked).onClick(()=>void p.runBulk(true)));
  if(p.summary)c.createEl('p',{text:p.summary,cls:'giu-status'});
- for(const e of p.entries){const box=c.createDiv({cls:'giu-entry'});box.createEl('h3',{text:`${e.name} (${e.id})`});box.createEl('p',{text:`${e.owner}/${e.repo} · ${e.branch} · ${e.directory||'repository root'}`});box.createEl('p',{text:`Installed: ${e.installedVersion??'not checked'} · Remote: ${e.remoteVersion??'not checked'}\n${p.busy.has(e.id)?'Working…':e.status??'Not checked'}${e.detail?' — '+e.detail:''}\nLast check: ${e.checked?new Date(e.checked).toLocaleString():'never'}`,cls:'giu-status'});
+ for(const e of p.entries){const box=c.createDiv({cls:'giu-entry'});box.createEl('h3',{text:e.name});
+ const details=box.createEl('dl',{cls:'giu-details'});
+ const field=(label:string,value:string)=>{const row=details.createDiv({cls:'giu-field'});row.createEl('dt',{text:label});row.createEl('dd',{text:value});};
+ field('Repository',`${e.owner}/${e.repo}`);field('Plugin ID',e.id);field('Branch',e.branch);field('Built files directory',e.directory||'Repository root');
+ field('Installed version',e.installedVersion??'Not checked');field('Remote version',e.remoteVersion??'Not checked');
+ field('Status',p.busy.has(e.id)?'Working...':e.status??'Not checked');
+ if(e.detail)field('Details',e.detail);
+ field('Last check',e.checked?new Date(e.checked).toLocaleString():'Never');
  new Setting(box).addButton(b=>b.setButtonText('Check').setDisabled(locked).onClick(()=>void p.operation(e))).addButton(b=>b.setButtonText(e.status==='Not installed'?'Install':'Update').setDisabled(locked||e.restart===true||!['Not installed','Update available'].includes(e.status??'')).onClick(()=>void p.operation(e,true))).addButton(b=>b.setButtonText('Edit').setDisabled(locked).onClick(()=>new RepositoryModal(this.app,p,e).open())).addButton(b=>b.setButtonText('Remove tracking').setDisabled(locked).onClick(async()=>{p.entries=p.entries.filter(x=>x!==e);await p.save();p.refresh();}));}
  }
 }
 
 class RepositoryModal extends Modal {
  constructor(app:App,private manager:Manager,private entry?:Entry){super(app);}
- onOpen(){const c=this.contentEl;c.createEl('h2',{text:this.entry?'Edit repository':'Add repository'});let repo=this.entry?`${this.entry.owner}/${this.entry.repo}`:'';let branch=this.entry?.branch??'';let dir=this.entry?.directory??'';let working=false;
+ onOpen(){const c=this.contentEl;c.addClass('giu-repository-modal');c.createEl('h2',{text:this.entry?'Edit repository':'Add repository'});let repo=this.entry?`${this.entry.owner}/${this.entry.repo}`:'';let branch=this.entry?.branch??'';let dir=this.entry?.directory??'';let working=false;
  new Setting(c).setName('GitHub URL or owner/repository').addText(t=>t.setValue(repo).onChange(v=>repo=v));new Setting(c).setName('Branch').setDesc('Leave blank to use the default branch.').addText(t=>t.setValue(branch).onChange(v=>branch=v));new Setting(c).setName('Built files directory').setDesc('Relative path; blank means repository root.').addText(t=>t.setValue(dir).onChange(v=>dir=v));const preview=c.createDiv();
  new Setting(c).addButton(b=>b.setButtonText('Review manifest').setCta().onClick(async()=>{if(working)return;working=true;b.setDisabled(true);preview.empty();try{
  const r=repository(repo);const d=directory(dir);const resolvedBranch=branch.trim()||await this.manager.github.defaultBranch(r.owner,r.repo);const config={...r,branch:resolvedBranch,directory:d};const s=await this.manager.github.resolve(config);const m=s.manifest;

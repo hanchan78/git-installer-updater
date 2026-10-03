@@ -1,2 +1,92 @@
-.giu-status { white-space: pre-wrap; overflow-wrap: anywhere; }
-.giu-entry { border-top: 1px solid var(--background-modifier-border); padding-top: 12px; }
+.giu-settings,
+.giu-repository-modal {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.giu-status {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.giu-entry {
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m, 8px);
+  background: var(--background-secondary);
+  min-width: 0;
+}
+
+.giu-entry h3 {
+  margin: 0 0 12px;
+}
+
+.giu-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: 12px 20px;
+  margin: 0 0 16px;
+}
+
+.giu-field {
+  min-width: 0;
+}
+
+.giu-field dt {
+  margin-bottom: 4px;
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+}
+
+.giu-field dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.giu-settings .setting-item,
+.giu-repository-modal .setting-item {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  min-width: 0;
+}
+
+.giu-settings .setting-item-info,
+.giu-repository-modal .setting-item-info {
+  margin-right: 0;
+  min-width: 0;
+}
+
+.giu-settings .setting-item-control,
+.giu-repository-modal .setting-item-control {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.giu-settings .setting-item-control button,
+.giu-repository-modal .setting-item-control button {
+  max-width: 100%;
+  height: auto;
+  min-height: 36px;
+  padding: 8px 12px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.giu-repository-modal .setting-item-control input {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.giu-entry .setting-item {
+  padding-bottom: 0;
+}
+
+.giu-entry .setting-item-info:empty,
+.giu-repository-modal .setting-item-info:empty {
+  display: none;
+}

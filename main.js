@@ -2348,6 +2348,7 @@ var ManagerTab = class extends import_obsidian.PluginSettingTab {
   display() {
     const c = this.containerEl;
     c.empty();
+    c.addClass("giu-settings");
     c.createEl("h2", { text: "Git Installer & Updater" });
     const p = this.manager;
     const locked = p.bulk || p.busy.size > 0;
@@ -2356,11 +2357,22 @@ var ManagerTab = class extends import_obsidian.PluginSettingTab {
     if (p.summary) c.createEl("p", { text: p.summary, cls: "giu-status" });
     for (const e of p.entries) {
       const box = c.createDiv({ cls: "giu-entry" });
-      box.createEl("h3", { text: `${e.name} (${e.id})` });
-      box.createEl("p", { text: `${e.owner}/${e.repo} \xB7 ${e.branch} \xB7 ${e.directory || "repository root"}` });
-      box.createEl("p", { text: `Installed: ${e.installedVersion ?? "not checked"} \xB7 Remote: ${e.remoteVersion ?? "not checked"}
-${p.busy.has(e.id) ? "Working\u2026" : e.status ?? "Not checked"}${e.detail ? " \u2014 " + e.detail : ""}
-Last check: ${e.checked ? new Date(e.checked).toLocaleString() : "never"}`, cls: "giu-status" });
+      box.createEl("h3", { text: e.name });
+      const details = box.createEl("dl", { cls: "giu-details" });
+      const field = (label, value) => {
+        const row = details.createDiv({ cls: "giu-field" });
+        row.createEl("dt", { text: label });
+        row.createEl("dd", { text: value });
+      };
+      field("Repository", `${e.owner}/${e.repo}`);
+      field("Plugin ID", e.id);
+      field("Branch", e.branch);
+      field("Built files directory", e.directory || "Repository root");
+      field("Installed version", e.installedVersion ?? "Not checked");
+      field("Remote version", e.remoteVersion ?? "Not checked");
+      field("Status", p.busy.has(e.id) ? "Working..." : e.status ?? "Not checked");
+      if (e.detail) field("Details", e.detail);
+      field("Last check", e.checked ? new Date(e.checked).toLocaleString() : "Never");
       new import_obsidian.Setting(box).addButton((b) => b.setButtonText("Check").setDisabled(locked).onClick(() => void p.operation(e))).addButton((b) => b.setButtonText(e.status === "Not installed" ? "Install" : "Update").setDisabled(locked || e.restart === true || !["Not installed", "Update available"].includes(e.status ?? "")).onClick(() => void p.operation(e, true))).addButton((b) => b.setButtonText("Edit").setDisabled(locked).onClick(() => new RepositoryModal(this.app, p, e).open())).addButton((b) => b.setButtonText("Remove tracking").setDisabled(locked).onClick(async () => {
         p.entries = p.entries.filter((x) => x !== e);
         await p.save();
@@ -2377,6 +2389,7 @@ var RepositoryModal = class extends import_obsidian.Modal {
   }
   onOpen() {
     const c = this.contentEl;
+    c.addClass("giu-repository-modal");
     c.createEl("h2", { text: this.entry ? "Edit repository" : "Add repository" });
     let repo = this.entry ? `${this.entry.owner}/${this.entry.repo}` : "";
     let branch = this.entry?.branch ?? "";

@@ -1,6 +1,6 @@
 {
   "name": "git-installer-updater",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "scripts": {"build": "tsc --noEmit && node build.mjs", "test": "node test.mjs"},
   "dependencies": {"semver": "^7.7.0"},
